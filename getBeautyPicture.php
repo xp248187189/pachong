@@ -151,5 +151,5 @@ class GetBeautyPicture{
 	}
 }
 
-GetBeautyPicture::saveImage('D:\fuli/');
+GetBeautyPicture::saveImage();
 // GetBeautyPicture::dump(GetBeautyPicture::getImgUrl());
