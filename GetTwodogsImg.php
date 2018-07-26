@@ -1,14 +1,15 @@
 <?php
 
+
 /**
- * 获取bing近15天的每日一图
+ * 爬取 二狗码头博客(www.twodogs.top) 的福利图
  */
-class getBingEverydayImg{
+class GetTwodogsImg{
 	/**
 	 * 打印数组
 	 * @param  array $arr 数组
 	 */
-	public static function dump($arr){
+	static public function dump($arr){
 		echo '<pre>';
 		print_r($arr);
 		echo '</pre>';
@@ -17,11 +18,12 @@ class getBingEverydayImg{
 	 * 自己封装的 cURL 方法
 	 * @param $url 请求网址
 	 * @param bool $params 请求参数
+	 * @param bool $header header头
 	 * @param bool $ispost 是否post请求
 	 * @param bool $https https协议
 	 * @return bool|mixed
 	 */
-	public static function curl($url, $params = false, $ispost = false, $https = false){
+	static public function curl($url, $params = false, $header = false, $ispost = false, $https = false){
 	    $httpInfo = array();
 	    $ch = curl_init();
 	    //强制使用 HTTP/1.1
@@ -29,9 +31,9 @@ class getBingEverydayImg{
 	    //在HTTP请求中包含一个"User-Agent: "头的字符串。
 	    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.62 Safari/537.36');
 	    //在尝试连接时等待的秒数。设置为0，则无限等待。
-	    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+	    // curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
 	    //允许 cURL 函数执行的最长秒数。
-	    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+	    // curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 	    //TRUE 将curl_exec()获取的信息以字符串返回，而不是直接输出。
 	    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	    if ($https) {
@@ -62,6 +64,9 @@ class getBingEverydayImg{
 	            curl_setopt($ch, CURLOPT_URL, $url);
 	        }
 	    }
+	    if ($header) {
+		    curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+	    }
 
 	    $response = curl_exec($ch);
 
@@ -78,48 +83,73 @@ class getBingEverydayImg{
 	    return $response;
 	}
 	/**
-	 * 获取图片地址
+	 * 获取图片url
 	 * @return array
 	 */
-	public static function getImg(){
-		$img = [];
-		for ($i=0; $i <=7 ; $i++) { 
-			$url = 'https://www.bing.com/HPImageArchive.aspx?format=js&idx='.$i.'&n=8';
-			$res = self::curl($url,false,false,true);
-			$res = json_decode($res,true);
-			foreach ($res['images'] as $key => $value) {
-				unset($res['images'][$key]['hs']);
-				$img[] = $res['images'][$key];
+	static public function getImgUrl(){
+		$header = [
+	    		'Accept: application/json, text/javascript, */*; q=0.01',
+	    		'Content-Type: application/json'
+	    	];
+		$imgUrl = [];
+		for ($i = 1; $i >0; $i++) {
+			$url_1 = 'http://twodogs.top:8020/api/Web/SearchFulieList';
+			$params_1 = json_encode(['page'=>$i,'size'=>1]);
+			$ispost_1 = true;
+			$https_1 = false;
+			$ids = self::curl($url_1,$params_1,$header,$ispost_1,$https_1);
+			$ids = json_decode($ids,true);
+			if (array_key_exists('Data',$ids)) {
+				if(!empty($ids['Data'])){
+					foreach ($ids['Data'] as $key => $value) {
+						$url_2 = 'http://twodogs.top:8020/api/Web/GetFuliDetail/'.$value['Id'];
+						$params_2 = [];
+						$ispost_2 = false;
+						$https_2 = false;
+						$res = self::curl($url_2,$params_2,$header,$ispost_2,$https_2);
+						$res = json_decode($res,true);
+						if (array_key_exists('Data',$res) && array_key_exists('detail',$res['Data'])) {
+							foreach ($res['Data']['detail'] as $k => $v) {
+								$tem['url'] = $v['Imgurl'];
+								$tem['id'] = $value['Id'];
+								$imgUrl[] = $tem;
+							}
+						}
+					}
+				}else{
+					break;
+				}
 			}
 		}
-		return $img;
+		return $imgUrl;
 	}
 	/**
 	 * 保存图片
 	 * @return [type] [description]
 	 */
-	static public function saveImage($dir = './imgs'){
+	static public function saveImage($dir = './getTwodogsImg'){
 		if (!is_dir($dir)) {
 			mkdir($dir,0777,true);
 		}
-		$img = self::getImg();
-		foreach ($img as $key => $value) {
-			// $saveName = $value['enddate'];
-			$temArr = explode('.',$value['url']);
-			$saveName = $value['enddate'].'.'.$temArr[1];
+		$imgUrl = self::getImgUrl();
+		foreach ($imgUrl as $key => $value) {
+			$temArr = explode('/', $value['url']);
+			$saveName = end($temArr);
 			if (!file_exists($dir.'/'.$saveName)) {
-				$url = 'https://cn.bing.com'.$value['url'];
+				$header = [
+			    		'Referer: http://www.twodogs.top/fulidetail.html?id='.$value['id']
+			    	];
 				$params = [];
 				$ispost = false;
-				$https = true;
-				$res = self::curl($url,$params,$ispost,$https);
+				$https = false;
+				$res = self::curl($value['url'],$params,$header,$ispost,$https);
 				$fp = fopen($dir.'/'.$saveName, 'a');
-				fwrite($fp, $res);
-				fclose($fp);
+			    fwrite($fp, $res);
+			    fclose($fp);
 			}
 		}
 	}
 }
 
-// getBingEverydayImg::dump(getBingEverydayImg::getImg());
-getBingEverydayImg::saveImage();
+GetTwodogsImg::saveImage();
+// GetTwodogsImg::dump(GetTwodogsImg::getImgUrl());
