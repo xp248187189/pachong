@@ -2,7 +2,7 @@
 
 
 /**
- * 爬取 二狗码头博客(www.twodogs.top)的福利图
+ * 爬取 二狗码头博客(www.twodogs.top) 的福利图
  */
 class GetBeautyPicture{
 	/**
