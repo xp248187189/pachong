@@ -93,6 +93,7 @@ class GetTwodogsImg{
 	    	];
 		$imgUrl = [];
 		for ($i = 1; $i >0; $i++) {
+			//每一页一篇文章，把每一篇文章找到
 			$url_1 = 'http://twodogs.top:8020/api/Web/SearchFulieList';
 			$params_1 = json_encode(['page'=>$i,'size'=>1]);
 			$ispost_1 = true;
@@ -102,6 +103,7 @@ class GetTwodogsImg{
 			if (array_key_exists('Data',$ids)) {
 				if(!empty($ids['Data'])){
 					foreach ($ids['Data'] as $key => $value) {
+						//每一页一张图片，把每一篇文章的的每一张图片找到
 						$url_2 = 'http://twodogs.top:8020/api/Web/GetFuliDetail/'.$value['Id'];
 						$params_2 = [];
 						$ispost_2 = false;
