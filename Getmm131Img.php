@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 获取 MM131美女图片(http://www.mm131.com)
+ * 爬取 美女图片网站(http://www.mm131.com) 的图片
  */
 class Getmm131Img{
 	/**

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 获取bing近15天的每日一图
+ * 获取 必应(https://cn.bing.com) 近15天的每日一图
  */
 class GetBingEverydayImg{
 	/**
