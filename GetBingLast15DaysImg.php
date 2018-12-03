@@ -3,7 +3,7 @@
 /**
  * 获取 必应(https://cn.bing.com) 近15天的每日一图
  */
-class GetBingEverydayImg{
+class GetBingLast15DaysImg{
 	/**
 	 * 打印数组
 	 * @param  array $arr 数组
@@ -125,5 +125,5 @@ class GetBingEverydayImg{
 	}
 }
 
-// GetBingEverydayImg::dump(GetBingEverydayImg::getImg());
-GetBingEverydayImg::saveImage();
+// GetBingLast15DaysImg::dump(GetBingLast15DaysImg::getImg());
+GetBingLast15DaysImg::saveImage();
