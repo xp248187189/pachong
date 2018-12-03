@@ -92,6 +92,10 @@ class GetBingEverydayImg{
 				$img[] = $res['images'][$key];
 			}
 		}
+		//去重
+		$img = array_unique($img,SORT_REGULAR);
+		//重置键明
+		$img = array_values($img);
 		return $img;
 	}
 	/**
