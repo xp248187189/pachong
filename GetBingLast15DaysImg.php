@@ -84,7 +84,7 @@ class GetBingLast15DaysImg{
 	public static function getImg(){
 		$img = [];
 		for ($i=0; $i <=7 ; $i++) { 
-			$url = 'https://www.bing.com/HPImageArchive.aspx?format=js&idx='.$i.'&n=8';
+			$url = 'https://cn.bing.com/HPImageArchive.aspx?format=js&idx='.$i.'&n=8';
 			$res = self::curl($url,false,false,true);
 			$res = json_decode($res,true);
 			foreach ($res['images'] as $key => $value) {
